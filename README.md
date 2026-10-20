@@ -1,2 +1,2 @@
-# KU-Competition-2026-Gunters-Workshop
-Gunter's Blacksmith Workshop
+# KU-Competition-2026-CS
+# Project Overview
