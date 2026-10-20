@@ -1,0 +1,12 @@
+StreamLit 1.42.0
+
+Place an order for any of the tools that Gunter provides:
+    ○ Sword
+    ○ Plate Armor
+    ○ Chain Mail
+    ○ Cooking Pot
+See where their order lies on Gunter’s to-do list. 
+
+README: This document should detail the functionality and features of your product. 
+Documentation: All code should be well documented. (DO NOT use AI to write comments.)  
+Code base: All necessary files to host your project.  
