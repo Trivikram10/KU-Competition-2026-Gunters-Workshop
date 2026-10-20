@@ -1,3 +1,5 @@
+StreamLit 1.42.0
+
 Place an order for any of the tools that Gunter provides:
     ○ Sword
     ○ Plate Armor
