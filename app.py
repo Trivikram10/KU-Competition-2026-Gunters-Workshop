@@ -23,7 +23,6 @@ st.markdown("""
         color-scheme: dark;
     }
 
-    /* ---------- Page ---------- */
     .stApp {
         background:
             radial-gradient(ellipse 80% 38% at 50% -6%, rgba(226,102,31,.26), transparent 70%),
@@ -45,7 +44,6 @@ st.markdown("""
     ::-webkit-scrollbar-thumb { background: var(--steel); border-radius: 6px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--ember); }
 
-    /* ---------- Typography ---------- */
     .stApp, .stApp p, .stApp li, .stApp label,
     [data-testid="stWidgetLabel"] p, [data-testid="stMarkdownContainer"] p {
         color: var(--parch);
@@ -75,7 +73,6 @@ st.markdown("""
         font-size: .92em;
     }
 
-    /* Heated-bar dividers */
     hr {
         border: 0 !important;
         height: 2px !important;
@@ -84,7 +81,6 @@ st.markdown("""
         opacity: .65;
     }
 
-    /* ---------- Portal switch (radio as pills) ---------- */
     [data-testid="stElementContainer"]:has([data-testid="stRadio"]) { width: 100% !important; }
     [data-testid="stRadio"] {
         display: flex !important;
@@ -123,7 +119,6 @@ st.markdown("""
     }
     [data-testid="stRadio"] label:has(input:checked) p { color: #FFF4E0; font-weight: 700; }
 
-    /* ---------- Tabs ---------- */
     .stTabs [data-baseweb="tab-list"] {
         display: flex !important;
         justify-content: space-between !important;
@@ -149,7 +144,6 @@ st.markdown("""
     .stTabs [data-baseweb="tab-highlight"] { background: var(--ember); height: 3px; }
     .stTabs [data-baseweb="tab-border"] { background: transparent; }
 
-    /* ---------- Cards ---------- */
     [data-testid="stVerticalBlockBorderWrapper"] {
         border-color: var(--steel);
         border-left-width: 4px;
@@ -179,7 +173,6 @@ st.markdown("""
         font-size: 1.6rem;
     }
 
-    /* ---------- Alerts & toasts ---------- */
     [data-testid="stAlert"] {
         background: var(--anvil);
         border: 1px solid var(--steel);
@@ -199,7 +192,6 @@ st.markdown("""
         box-shadow: 0 8px 24px rgba(0,0,0,.45);
     }
 
-    /* ---------- Inputs ---------- */
     [data-baseweb="input"], [data-baseweb="base-input"], [data-baseweb="select"] > div {
         background: var(--deep) !important;
         border-color: var(--steel) !important;
@@ -229,7 +221,6 @@ st.markdown("""
         border-color: var(--molten) !important;
     }
 
-    /* ---------- Buttons ---------- */
     .stButton > button, [data-testid="stFormSubmitButton"] > button,
     [data-testid="stBaseButton-secondary"], [data-testid="stBaseButton-secondaryFormSubmit"] {
         background: linear-gradient(135deg, var(--molten), var(--ember));
@@ -254,7 +245,6 @@ st.markdown("""
     }
     [data-testid="stFormSubmitButton"] > button { width: 100%; padding: .65rem 1.2rem; }
 
-    /* ---------- Sidebar (Gunter's Vault) ---------- */
     [data-testid="stSidebar"] {
         background: var(--deep);
         border-right: 1px solid var(--steel);
@@ -267,7 +257,6 @@ st.markdown("""
         font-size: 1.9rem;
     }
 
-    /* ---------- Material progress bars ---------- */
     .stProgress > div > div { background: var(--steel) !important; border-radius: 999px; }
     .stProgress > div > div > div, .stProgress [role="progressbar"] > div {
         background: linear-gradient(90deg, #B8480F, var(--ember), var(--molten)) !important;
@@ -451,14 +440,14 @@ else:
 
         if passcode.strip().lower() == "gunter":
             st.session_state.authenticated = True
-            st.toast("🔓 Access Granted! Welcome back, Forge Master Gunter.", icon="⚒️")
+            st.toast("🔓 Access Granted! Welcome back, Master Gunter.", icon="⚒️")
             st.rerun()
         elif passcode.strip() != "":
             st.error("⚠️ Access Denied! Invalid Passcode. Please try again.")
     else:
         st.sidebar.markdown("### 🪙 Gunter's Vault")
         st.sidebar.metric("Gold Vault Balance", f"{st.session_state.gold_vault} Gold")
-        st.sidebar.caption("Updates dynamically on completed orders & merchant purchases.")
+        st.sidebar.caption("Updates automatically on completed orders & merchant purchases.")
         
         if st.sidebar.button("🔒 Logout of Portal"):
             st.session_state.authenticated = False
@@ -539,10 +528,10 @@ else:
             st.write("Purchase raw supplies directly using Gold from Gunter's Vault.")
 
             prices = {
-                "Iron Ingots": 20,
+                "Iron Ingots": 25,
                 "Steel Plates": 50,
                 "Mithril Ores": 100,
-                "Bronze Bars": 5
+                "Bronze Bars": 10
             }
 
             for mat_name, count in st.session_state.inventory.items():
