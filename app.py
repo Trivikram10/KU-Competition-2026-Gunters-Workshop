@@ -1,16 +1,24 @@
+"""This File contains the entire streamlit app. It handles the storefront, custom orders, the admin tools for gun, inventory 
+    tracking, Gold Balance, and the 3:1 queue system"""
+
 import streamlit as st
 import datetime
-
+#  Sets up the page and configures the browser tab 
 st.set_page_config(
     page_title="Gunter's Royal Blacksmith Shop",
     page_icon="⚒️",
     layout="centered"
 )
 
+# AI Assisted in the styling section below
+# The color variables, dark gradients, custom scrollbars
+# and tab layouts below were assisted by Artificial Intelligence in the making. 
 st.markdown("""
     <style>
+    /*Import google fonts*/
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap');
 
+    /*CSS root variables that define the color pallete for the blacksmith*/
     :root {
         --soot: #1B1816;
         --deep: #14110F;
@@ -23,6 +31,7 @@ st.markdown("""
         color-scheme: dark;
     }
 
+    /*Application Background and controls font settings*/
     .stApp {
         background:
             radial-gradient(ellipse 80% 38% at 50% -6%, rgba(226,102,31,.26), transparent 70%),
@@ -31,24 +40,33 @@ st.markdown("""
         font-family: 'Alegreya Sans', 'Segoe UI', sans-serif;
         font-size: 1.05rem;
     }
+    
+    /*Hides Strealit header and the default elements for the footer*/
     header[data-testid="stHeader"] { background: transparent; }
     footer { visibility: hidden; }
     [data-testid="stHeaderActionElements"] { display: none; }
+
+    /*Centering the main container width for the app*/
     [data-testid="stMainBlockContainer"], .block-container {
         max-width: 960px !important;
         padding-top: 2.5rem;
         padding-bottom: 4rem;
     }
+
+    /*Custom styling for the scrollbar*/
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: var(--deep); }
     ::-webkit-scrollbar-thumb { background: var(--steel); border-radius: 6px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--ember); }
 
+    /*Overrides the text colors*/
     .stApp, .stApp p, .stApp li, .stApp label,
     [data-testid="stWidgetLabel"] p, [data-testid="stMarkdownContainer"] p {
         color: var(--parch);
     }
     [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p { color: var(--ash); }
+
+    /*heading style and appearance*/
     .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5 {
         font-family: 'Cinzel', 'Georgia', serif;
         color: var(--parch);
@@ -65,6 +83,8 @@ st.markdown("""
     .stApp h3 { font-size: 1.25rem; font-weight: 700; }
     .stApp h4 { font-size: 1.05rem; font-weight: 700; color: var(--molten); }
     [data-testid="stWidgetLabel"] p { font-weight: 500; }
+
+    /*Inline styling*/
     code, .stApp code {
         background: rgba(226,102,31,.16);
         color: var(--molten);
@@ -73,6 +93,7 @@ st.markdown("""
         font-size: .92em;
     }
 
+    /*Custom rule divider - Horizontal*/
     hr {
         border: 0 !important;
         height: 2px !important;
@@ -81,6 +102,7 @@ st.markdown("""
         opacity: .65;
     }
 
+    /*Styling for the widget and the radio button*/
     [data-testid="stElementContainer"]:has([data-testid="stRadio"]) { width: 100% !important; }
     [data-testid="stRadio"] {
         display: flex !important;
@@ -119,6 +141,7 @@ st.markdown("""
     }
     [data-testid="stRadio"] label:has(input:checked) p { color: #FFF4E0; font-weight: 700; }
 
+    /*Styling for the navigation tabs*/
     .stTabs [data-baseweb="tab-list"] {
         display: flex !important;
         justify-content: space-between !important;
@@ -144,6 +167,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab-highlight"] { background: var(--ember); height: 3px; }
     .stTabs [data-baseweb="tab-border"] { background: transparent; }
 
+    /*Form Boxes and containers*/
     [data-testid="stVerticalBlockBorderWrapper"] {
         border-color: var(--steel);
         border-left-width: 4px;
@@ -158,6 +182,8 @@ st.markdown("""
         padding: 1.5rem 1.6rem;
         box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
+
+    /*Styling for the metric cards*/
     [data-testid="stMetric"] {
         background: var(--anvil);
         border: 1px solid var(--steel);
@@ -173,6 +199,7 @@ st.markdown("""
         font-size: 1.6rem;
     }
 
+    /*Notification for alerts and competed orders, etc*/
     [data-testid="stAlert"] {
         background: var(--anvil);
         border: 1px solid var(--steel);
@@ -192,6 +219,7 @@ st.markdown("""
         box-shadow: 0 8px 24px rgba(0,0,0,.45);
     }
 
+    /*Input, dropdown and text field styling*/
     [data-baseweb="input"], [data-baseweb="base-input"], [data-baseweb="select"] > div {
         background: var(--deep) !important;
         border-color: var(--steel) !important;
@@ -221,6 +249,7 @@ st.markdown("""
         border-color: var(--molten) !important;
     }
 
+    /*Button styling*/
     .stButton > button, [data-testid="stFormSubmitButton"] > button,
     [data-testid="stBaseButton-secondary"], [data-testid="stBaseButton-secondaryFormSubmit"] {
         background: linear-gradient(135deg, var(--molten), var(--ember));
@@ -245,6 +274,7 @@ st.markdown("""
     }
     [data-testid="stFormSubmitButton"] > button { width: 100%; padding: .65rem 1.2rem; }
 
+    /*Sidebar layout and styling*/
     [data-testid="stSidebar"] {
         background: var(--deep);
         border-right: 1px solid var(--steel);
@@ -257,6 +287,7 @@ st.markdown("""
         font-size: 1.9rem;
     }
 
+    /*Progress Bar Styling*/
     .stProgress > div > div { background: var(--steel) !important; border-radius: 999px; }
     .stProgress > div > div > div, .stProgress [role="progressbar"] > div {
         background: linear-gradient(90deg, #B8480F, var(--ember), var(--molten)) !important;
@@ -265,6 +296,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Initializes the session state variables if they are not set already
 if "orders" not in st.session_state:
     st.session_state.orders = []
 
@@ -285,6 +317,7 @@ if "form_key" not in st.session_state:
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
+# Arranges active orders in a way that for every 3 express orders a regular order appears to keep it fair for everybody
 def get_ordered_queue(orders_list):
     active_orders = [o for o in orders_list if o['status'] != "Completed"]
     express_orders = [o for o in active_orders if o.get('is_express')]
@@ -305,6 +338,7 @@ def get_ordered_queue(orders_list):
             
     return interleaved
 
+# App title and portal switch
 st.title("Gunter's Royal Blacksmith Shop")
 st.divider()
 
@@ -316,12 +350,14 @@ portal_choice = st.radio(
 
 st.divider()
 
+# Handle customer portal view 
 if portal_choice == "Customer":
     tab_store, tab_queue = st.tabs([
         "🛒 Storefront & Order", 
         "📜 To-Do Queue"
     ])
 
+# Tab for placing orders
     with tab_store:
         st.subheader("Select Your Blacksmith Gear")
         st.write("Browse Gunter's legendary catalog using your magical orb.")
@@ -376,7 +412,8 @@ if portal_choice == "Customer":
             st.write(f"💰 **Total Price:** `{total_cost} Gold Coins`")
 
             submit_btn = st.form_submit_button("Submit Order to Gunter")
-
+            
+            # Validates the input and adds the order to the session state after submitting the order
             if submit_btn:
                 if not customer_name.strip():
                     st.error("⚠️ Please enter your name before submitting!")
@@ -414,6 +451,7 @@ if portal_choice == "Customer":
                     st.balloons()
                     st.rerun()
 
+    # To do Queue tab for customers to see where their order lies in Gunter's active orders list
     with tab_queue:
         st.subheader("📜 To-Do Queue")
 
@@ -433,7 +471,10 @@ if portal_choice == "Customer":
                     st.write(f"💰 **Total Price:** {order['cost']} Gold")
                     st.write(f"📌 **Status:** {status_color} `{order['status']}`")
 
+# Handles the Gunter's portal view
 else:
+
+    # Authentication check by asking for a password
     if not st.session_state.authenticated:
         st.subheader("🔒 Gunter's Private Forge Master Portal")
         passcode = st.text_input("Enter Password:", type="password")
@@ -445,6 +486,8 @@ else:
         elif passcode.strip() != "":
             st.error("⚠️ Access Denied! Invalid Passcode. Please try again.")
     else:
+
+        # The sidebar for the gold balance that updates dynamically 
         st.sidebar.markdown("### 🪙 Gunter's Vault")
         st.sidebar.metric("Gold Vault Balance", f"{st.session_state.gold_vault} Gold")
         st.sidebar.caption("Updates automatically on completed orders & merchant purchases.")
@@ -458,6 +501,7 @@ else:
             "✅ Completed Orders"
         ])
 
+        # Forge Dashboard tab for managing the inventory and orders that come in for Gunter
         with tab_manage:
             st.subheader("📊 Forge Master Dashboard")
             st.write("Manage workflow, update order statuses, deduct raw materials, and monitor shop earnings.")
@@ -500,7 +544,8 @@ else:
                                 index=status_index,
                                 key=f"status_select_{order['id']}"
                             )
-                            
+
+                            # Applies the status update, updates the inventory, and collects the gold from the order if completed
                             if st.button("Apply Update", key=f"btn_update_{order['id']}"):
                                 required_mat = order['material_inventory_key']
                                 
@@ -557,6 +602,8 @@ else:
                         total_purchase_cost = qty_to_buy * unit_cost
                         st.write("")
                         st.write("")
+
+                        # Handles the purchasing of the raw materials using the gold from Gunter's vault
                         if st.button(f"Buy ({total_purchase_cost}g)", key=f"buy_btn_{mat_name}"):
                             if st.session_state.gold_vault < total_purchase_cost:
                                 st.error(f"⚠️ Insufficient Gold in Vault! Need {total_purchase_cost} Gold, but only have {st.session_state.gold_vault} Gold.")
@@ -567,6 +614,7 @@ else:
                                 st.rerun()
                 st.write("---")
 
+        # The completed orders tab where when Gunter updates an order as completed it goes here
         with tab_completed:
             st.subheader("✅ Completed Orders")
             st.write("Successfully forged and delivered orders.")
