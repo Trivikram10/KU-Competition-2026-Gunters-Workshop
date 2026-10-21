@@ -334,7 +334,7 @@ if "show_balloons" not in st.session_state:
 if "view_mode" not in st.session_state:
     st.session_state.view_mode = "shop"
 
-# Minecart Dropper game shown on the page after "Close App".
+# Minecart Dropper game shown on the page after "Close App". Built into a website with AI. 
 # It is plain HTML + JavaScript on a canvas, embedded straight into Streamlit, so there is
 # nothing to build and no extra files or static folders are needed.
 DROPPER_GAME_HTML = r"""<!DOCTYPE html>
@@ -388,7 +388,7 @@ DROPPER_GAME_HTML = r"""<!DOCTYPE html>
     document.fonts.load("500 16px 'Cinzel'").catch(function () {});
   }
 
-  // ---------- ore + fire art ----------
+
   var ORE = [
     { base: '#8A95A1', hi: '#D3DCE2', lo: '#555E68' },   // iron
     { base: '#D49A22', hi: '#FFE394', lo: '#8A5A0B' },   // gold
@@ -451,7 +451,7 @@ DROPPER_GAME_HTML = r"""<!DOCTYPE html>
     ctx.restore();
   }
 
-  // ---------- pre-rendered cave background ----------
+
   var bg = document.createElement('canvas');
   bg.width = W; bg.height = H;
   (function paintBackground() {
@@ -484,7 +484,6 @@ DROPPER_GAME_HTML = r"""<!DOCTYPE html>
     b.fillStyle = '#A89D8A'; b.fillRect(0, RAIL_Y - 1, W, 1.5);
   })();
 
-  // ---------- game state ----------
   var state = 'ready';            // ready | playing | won | lost
   var t = 0;
   var cart = { x: W / 2 };
@@ -531,7 +530,6 @@ DROPPER_GAME_HTML = r"""<!DOCTYPE html>
     }
   }
 
-  // ---------- update ----------
   function moveCart(dt) {
     var dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
     if (dir !== 0) {
@@ -598,7 +596,6 @@ DROPPER_GAME_HTML = r"""<!DOCTYPE html>
     flash = Math.max(0, flash - dt);
   }
 
-  // ---------- draw ----------
   function label(str, x, y, size, weight, color, align, glow) {
     ctx.font = weight + ' ' + size + 'px ' + SERIF;
     ctx.textAlign = align || 'left';
@@ -753,7 +750,6 @@ DROPPER_GAME_HTML = r"""<!DOCTYPE html>
     }
   }
 
-  // ---------- input ----------
   function startOrRestart() {
     if (state === 'ready' || ((state === 'won' || state === 'lost') && t - endAt > 0.7)) resetGame();
   }
