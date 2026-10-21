@@ -58,7 +58,7 @@ Alternate Way to access the application
 
 # Documentation
 
-AI Usage: AI was used in this project to help with the custom CSS styling. 
+AI Usage: AI was used in this project to help with the custom CSS styling. AI was also used in the integration of the dropper game as a website into strealit using HTML. 
 
 # Codebase
 
