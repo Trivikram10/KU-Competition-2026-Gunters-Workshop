@@ -1,5 +1,5 @@
-"""This File contains the entire streamlit app. It handles the storefront, custom orders, the admin tools for gun, inventory 
-    tracking, Gold Balance, and the 3:1 queue system"""
+""" This File contains the entire Streamlit app. It handles the storefront, custom orders, the admin tools for gunter, inventory 
+    tracking, Gold Balance, and the 3:1 queue system."""
 
 import streamlit as st
 import datetime
@@ -301,7 +301,7 @@ if "orders" not in st.session_state:
     st.session_state.orders = []
 
 if "gold_vault" not in st.session_state:
-    st.session_state.gold_vault = 500
+    st.session_state.gold_vault = 0
 
 if "inventory" not in st.session_state:
     st.session_state.inventory = {
@@ -374,42 +374,39 @@ if portal_choice == "Customer":
         
         st.info(f"### {item_info['icon']} {selected_item}\n{item_info['desc']}\n\n**Base Price:** {item_info['base_price']} Gold Coins")
 
+        material = st.selectbox("Select Material Grade:", [
+            "Iron (Standard)", 
+            "Steel (+50 Gold)", 
+            "Mithril (+150 Gold)", 
+            "Bronze (-20 Gold)"
+        ], key=f"mat_{selected_item}_{st.session_state.form_key}")
+        
+        rune_enhancement = st.selectbox("Select Rune Enhancement:", [
+            "None", 
+            "Flame Rune (+25 Gold)", 
+            "Frost Rune (+25 Gold)", 
+            "Lightning Rune (+35 Gold)"
+        ], key=f"rune_{selected_item}_{st.session_state.form_key}")
+
+        st.markdown("#### ⚡ Gunter's Express Forge Service")
+        express_priority = st.checkbox("Rush Order: Express Forge Priority (+50 Gold)", key=f"express_{selected_item}_{st.session_state.form_key}")
+
+        material_extra = 0
+        if "Steel" in material: material_extra = 50
+        elif "Mithril" in material: material_extra = 150
+        elif "Bronze" in material: material_extra = -20
+
+        rune_cost = 0
+        if "Flame" in rune_enhancement or "Frost" in rune_enhancement: rune_cost = 25
+        elif "Lightning" in rune_enhancement: rune_cost = 35
+
+        express_cost = 50 if express_priority else 0
+        total_cost = item_info['base_price'] + material_extra + rune_cost + express_cost
+        
+        st.write(f"💰 **Total Price:** `{total_cost} Gold Coins`")
+
         with st.form("order_placement_form"):
-            st.markdown("#### ⚙️ Customization & Enhancements")
-            
-            material = st.selectbox("Select Material Grade:", [
-                "Iron (Standard)", 
-                "Steel (+50 Gold)", 
-                "Mithril (+150 Gold)", 
-                "Bronze (-20 Gold)"
-            ], key=f"mat_{st.session_state.form_key}")
-            
-            st.markdown("#### ✨ Magical Rune Engravings")
-            rune_enhancement = st.selectbox("Select Rune Enhancement:", [
-                "None", 
-                "Flame Rune (+25 Gold)", 
-                "Frost Rune (+25 Gold)", 
-                "Lightning Rune (+35 Gold)"
-            ], key=f"rune_{st.session_state.form_key}")
-
-            st.markdown("#### ⚡ Gunter's Express Forge Service")
-            express_priority = st.checkbox("Rush Order: Express Forge Priority (+50 Gold)", key=f"express_{st.session_state.form_key}")
-
             customer_name = st.text_input("Adventurer / Guild Name:", key=f"name_{st.session_state.form_key}")
-
-            material_extra = 0
-            if "Steel" in material: material_extra = 50
-            elif "Mithril" in material: material_extra = 150
-            elif "Bronze" in material: material_extra = -20
-
-            rune_cost = 0
-            if "Flame" in rune_enhancement or "Frost" in rune_enhancement: rune_cost = 25
-            elif "Lightning" in rune_enhancement: rune_cost = 35
-
-            express_cost = 50 if express_priority else 0
-
-            total_cost = item_info['base_price'] + material_extra + rune_cost + express_cost
-            st.write(f"💰 **Total Price:** `{total_cost} Gold Coins`")
 
             submit_btn = st.form_submit_button("Submit Order to Gunter")
             
