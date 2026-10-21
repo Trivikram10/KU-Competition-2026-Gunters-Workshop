@@ -1,8 +1,9 @@
-""" This File contains the entire Streamlit app. It handles the storefront, custom orders, the admin tools for gunter, inventory 
-    tracking, Gold Balance, and the 3:1 queue system."""
+# This File contains the entire streamlit app. It handles the storefront, custom orders, the admin tools for gun, inventory 
+    # tracking, Gold Balance, and the 3:1 queue system
 
 import streamlit as st
 import datetime
+import os
 #  Sets up the page and configures the browser tab 
 st.set_page_config(
     page_title="Gunter's Royal Blacksmith Shop",
@@ -303,6 +304,9 @@ if "orders" not in st.session_state:
 if "gold_vault" not in st.session_state:
     st.session_state.gold_vault = 0
 
+if "gunter_points" not in st.session_state:
+    st.session_state.gunter_points = 50
+
 if "inventory" not in st.session_state:
     st.session_state.inventory = {
         "Iron Ingots": 50,
@@ -316,6 +320,13 @@ if "form_key" not in st.session_state:
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
+
+# Session state to persist game outcomes permanently across reruns
+if "last_game_result" not in st.session_state:
+    st.session_state.last_game_result = None
+
+if "show_balloons" not in st.session_state:
+    st.session_state.show_balloons = False
 
 # Arranges active orders in a way that for every 3 express orders a regular order appears to keep it fair for everybody
 def get_ordered_queue(orders_list):
@@ -493,9 +504,10 @@ else:
             st.session_state.authenticated = False
             st.rerun()
 
-        tab_manage, tab_completed = st.tabs([
+        tab_manage, tab_completed, tab_gamble = st.tabs([
             "📊 Forge Dashboard & Queue", 
-            "✅ Completed Orders"
+            "✅ Completed Orders",
+            "🎲 The Tavern & Gamble"
         ])
 
         # Forge Dashboard tab for managing the inventory and orders that come in for Gunter
@@ -629,3 +641,172 @@ else:
                         st.write(f"✨ **Details:** {order['extra']}")
                         st.write(f"💰 **Revenue Collected:** {order['cost']} Gold")
                         st.write(f"📌 **Status:** ✅ `Completed`")
+
+        # Gambling games for Gunter
+        with tab_gamble:
+            st.subheader("🍺 The Rusty Tavern")
+            st.write("Welcome, Master Gunter.")
+            
+            col_p1, col_p2 = st.columns(2)
+            col_p1.metric("🎲 Tavern Points", f"{st.session_state.gunter_points} pts")
+            col_p2.metric("🪙 Vault Gold", f"{st.session_state.gold_vault} Gold")
+            
+            st.divider()
+            
+            st.markdown("#### 💱 Money & Points Changers")
+            
+            col_conv1, col_conv2 = st.columns(2)
+            
+            with col_conv1:
+                st.markdown("##### Points to Gold Vault")
+                st.write("Rate: 1 Point = 1 Gold Coin")
+                pts_to_gold = st.number_input("Points to convert:", min_value=1, max_value=max(1000000, st.session_state.gunter_points), value=1, key="pts_to_gold_qty")
+                if st.button("Convert Points ➔ Gold"):
+                    if st.session_state.gunter_points <= 0 or pts_to_gold > st.session_state.gunter_points:
+                        st.error("⚠️ You don't have enough points. Gamble more.")
+                    else:
+                        st.session_state.gunter_points -= pts_to_gold
+                        st.session_state.gold_vault += pts_to_gold
+                        st.toast(f"🪙 Converted {pts_to_gold} points into {pts_to_gold} gold coins!", icon="💰")
+                        st.rerun()
+
+            with col_conv2:
+                st.markdown("##### Gold Vault to Points")
+                st.write("Rate: 1 Gold Coin = 1 Point")
+                gold_to_pts = st.number_input("Gold to convert:", min_value=1, max_value=max(1000000, st.session_state.gold_vault), value=1, key="gold_to_pts_qty")
+                if st.button("Convert Gold ➔ Points"):
+                    if st.session_state.gold_vault <= 0 or gold_to_pts > st.session_state.gold_vault:
+                        st.error("⚠️ You don't have enough gold in your vault!")
+                    else:
+                        st.session_state.gold_vault -= gold_to_pts
+                        st.session_state.gunter_points += gold_to_pts
+                        st.toast(f"🎲 Converted {gold_to_pts} gold into {gold_to_pts} tavern points!", icon="🪙")
+                        st.rerun()
+                
+            st.divider()
+            
+            game_choice = st.radio("Choose Your Game of Chance:", ["🪙 Coin Toss (50/50)", "🎲 Hazard Dice"], horizontal=True, key="gambling_game_select")
+            
+            import random
+            
+            if "Coin Toss" in game_choice:
+                st.markdown("#### 🪙 The Royal Coin Toss")
+                st.write("Get the Flip right to double your wage.")
+                
+                max_toss_bet = max(1, st.session_state.gunter_points)
+                default_toss_val = min(10, max_toss_bet)
+                toss_bet = st.number_input("Wager Points:", min_value=1, max_value=max_toss_bet, value=default_toss_val, key="toss_bet_input")
+                coin_choice = st.radio("King or Witch?", ["King", "Witch"], horizontal=True, key="coin_call_choice")
+                
+                if st.button("Flip the Coin!", key="toss_submit_btn"):
+                    if st.session_state.gunter_points <= 0:
+                        st.error("⚠️ You have 0 points! Earn or convert more before gambling.")
+                    elif toss_bet > st.session_state.gunter_points:
+                        st.error("⚠️ You don't have enough points. Gamble more.")
+                    else:
+                        outcome = random.choice(["King", "Witch"])
+                        img_filename = "CoinHeads.png" if outcome == "King" else "CoinTails.png"
+                        
+                        if coin_choice == outcome:
+                            st.session_state.gunter_points += toss_bet
+                            msg = f"🎉 You won `{toss_bet}` points!"
+                            status_type = "success"
+                        else:
+                            st.session_state.gunter_points -= toss_bet
+                            msg = f"💀 You lost `{toss_bet}` points."
+                            status_type = "error"
+                        
+                        # Store in session state and trigger one-time balloons
+                        st.session_state.last_game_result = {
+                            "type": "coin",
+                            "outcome": outcome,
+                            "img": img_filename,
+                            "msg": msg,
+                            "status": status_type
+                        }
+                        if status_type == "success":
+                            st.session_state.show_balloons = True
+                        st.rerun()
+            
+            else:
+                st.markdown("#### 🎲 Hazard Dice")
+                st.write("Set your target number on a 6-sided die, then guess whether the roll will land High or Low.")
+                
+                max_hazard_bet = max(1, st.session_state.gunter_points)
+                default_hazard_val = min(10, max_hazard_bet)
+                hazard_bet = st.number_input("Wager Points:", min_value=1, max_value=max_hazard_bet, value=default_hazard_val, key="hazard_bet_input")
+                target_num = st.selectbox("Select Target Number:", [1, 2, 3, 4, 5, 6], key="hazard_target_select")
+                guess = st.radio("Will the roll be High (Above target) or Low (Below target)?", ["High", "Low"], horizontal=True, key="hazard_guess_select")
+                
+                st.caption(f"ℹ️ Target is **{target_num}**. If you pick **High**, you win if the die rolls above {target_num}. If you pick **Low**, you win if it rolls below {target_num}. (Exact matches house wins).")
+                
+                if st.button("Roll the Die!", key="hazard_roll_btn"):
+                    if st.session_state.gunter_points <= 0:
+                        st.error("⚠️ You have 0 points! Earn or convert more before gambling.")
+                    elif hazard_bet > st.session_state.gunter_points:
+                        st.error("⚠️ You don't have enough points. Gamble more.")
+                    else:
+                        rolled = random.randint(1, 6)
+                        dice_filename = f"Dice{rolled}.png"
+                        
+                        won = False
+                        house_win = False
+                        
+                        if rolled == target_num:
+                            house_win = True
+                        elif guess == "High" and rolled > target_num:
+                            won = True
+                        elif guess == "Low" and rolled < target_num:
+                            won = True
+                            
+                        if house_win:
+                            st.session_state.gunter_points -= hazard_bet
+                            msg = f"🏛️ The roll matched your target exactly ({rolled}). The house takes your wager. You lost `{hazard_bet}` points."
+                            status_type = "warning"
+                        elif won:
+                            st.session_state.gunter_points += hazard_bet
+                            msg = f"🎉 Your prediction was correct! You won `{hazard_bet}` points."
+                            status_type = "success"
+                        else:
+                            st.session_state.gunter_points -= hazard_bet
+                            msg = f"💀 You lost `{hazard_bet}` points."
+                            status_type = "error"
+                            
+                        # Store in session state and trigger one-time balloons
+                        st.session_state.last_game_result = {
+                            "type": "dice",
+                            "rolled": rolled,
+                            "img": dice_filename,
+                            "msg": msg,
+                            "status": status_type
+                        }
+                        if status_type == "success":
+                            st.session_state.show_balloons = True
+                        st.rerun()
+
+            # Display the last game result the without looping balloons on reruns
+            if st.session_state.last_game_result:
+                res = st.session_state.last_game_result
+                st.divider()
+                st.markdown("### 📜 Last Tavern Game Result")
+                
+                if res["type"] == "coin":
+                    st.write(f"🪙 **Result:** The coin landed on **{res['outcome']}**!")
+                else:
+                    st.write(f"🎲 **Result:** The die rolled a **{res['rolled']}**!")
+                
+                img_path = os.path.join(os.path.dirname(__file__), res["img"])
+                if os.path.exists(img_path):
+                    st.image(img_path, width=130)
+                else:
+                    st.warning(f"⚠️ Image file `{res['img']}` not found in app directory.")
+                
+                if res["status"] == "success":
+                    st.success(res["msg"])
+                    if st.session_state.show_balloons:
+                        st.balloons()
+                        st.session_state.show_balloons = False # Reset so balloons only fire once per win
+                elif res["status"] == "warning":
+                    st.warning(res["msg"])
+                else:
+                    st.error(res["msg"])
